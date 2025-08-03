@@ -1,0 +1,73 @@
+# ============================
+# 1. Backend - civicpark-server (Java / Spring Boot)
+# ============================
+/civicpark-server/target/
+!/civicpark-server/.mvn/wrapper/maven-wrapper.jar
+/civicpark-server/logs/
+**/*.log
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+
+# Maven
+/civicpark-server/.mvn/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle (if used)
+/civicpark-server/build/
+.civicpark-server/.gradle/
+!civicpark-server/gradle-wrapper.jar
+
+# IDEs
+/civicpark-server/.idea/
+*.iws
+*.ipr
+*.iml
+
+# Eclipse
+.civicpark-server/.project
+.civicpark-server/.classpath
+.civicpark-server/.settings/
+
+# IntelliJ
+/civicpark-server/*.iml
+/civicpark-server/out/
+
+# VSCode
+/civicpark-server/.vscode/
+
+# ============================
+# 2. Frontend - civicpark-client (React)
+# ============================
+/civicpark-client/node_modules/
+/civicpark-client/.next/
+/civicpark-client/.cache/
+/civicpark-client/build/
+/civicpark-client/dist/
+/civicpark-client/.parcel-cache/
+
+# Logs
+/civicpark-client/npm-debug.log*
+/civicpark-client/yarn-debug.log*
+/civicpark-client/yarn-error.log*
+
+# Dependency directories
+/civicpark-client/.pnp/
+/civicpark-client/pnp.js
+
+# dotenv environment files
+/civicpark-client/.env
+/civicpark-client/.env.*.local
+
+# Editor directories and files
+/civicpark-client/.vscode/
+/civicpark-client/.idea/
+
+# Mac system files
+/civicpark-client/.DS_Store
+
