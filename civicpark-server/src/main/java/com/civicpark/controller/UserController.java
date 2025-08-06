@@ -21,6 +21,8 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
+
+//==================== User Controller ====================//
 public class UserController {
 
 	private final UserService userService;
@@ -29,22 +31,32 @@ public class UserController {
 		this.userService = userService;
 	}
 
+	// =============== saving user in database controller ===============//
 	@PostMapping
 	public ResponseEntity<?> addUser(@RequestBody UserRequestDTO user) {
 
-		User newUser = userService.addUser(user);
-		if (newUser.equals(null)) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("something went wrong");
+		try {
+			User newUser = userService.addUser(user);
+
+			if (newUser == null) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User could not be created");
+			}
+			return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+		} catch (Exception e) {
+			// Log error in a real application
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("An unexpected error occurred: " + e.getMessage());
 		}
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
 	}
 
+	// =============== get all the users ===============//
 	@GetMapping
 	public ResponseEntity<List<User>> getUser() {
 		return ResponseEntity.status(HttpStatus.OK).body(userService.getUsers());
 	}
 
+	// =============== update user password ===============//
 	@PatchMapping("/{id}")
 	public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestBody UpdatePasswordRequest password) {
 		userService.updatePassword(id, password);

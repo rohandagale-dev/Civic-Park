@@ -14,7 +14,6 @@ public class UserMapper {
 		user.setEmail(dto.getEmail());
 		user.setPassword(dto.getPassword());
 		user.setContactNumber(dto.getContactNumber());
-		user.setRegisteredOn(dto.getRegisteredOn());
 		user.setAddress(addressMapper.toEntity(dto.getAddress()));
 		return user;
 	}

@@ -33,30 +33,30 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")
 	private Long userId;
-	
+
 	@Column(name = "first_name", nullable = false)
 	private String firstName;
-	
+
 	@Column(name = "middle_name", nullable = false)
 	private String middleName;
-	
+
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
-	
-	@Column(name = "email", nullable  = false)
+
+	@Column(name = "email", nullable = false)
 	private String email;
-	
-	@Column(name = "password", nullable  = false)
+
+	@Column(name = "password", nullable = false)
 	@NotBlank(message = "password should not be blank")
 	@Size(min = 8, max = 64)
 	private String password;
-	
-	@Column(name = "contact_number", nullable  = false)
+
+	@Column(name = "contact_number", nullable = false)
 	private String contactNumber;
-	
-	@Column(name = "registered_on")
-	private Date registeredOn;
-	
+
+	@Column(updatable = false)
+	private LocalDateTime createdAt;
+
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "address_id", referencedColumnName = "address_id", nullable = false)
 	private Address address;

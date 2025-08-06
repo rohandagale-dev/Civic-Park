@@ -1,7 +1,7 @@
 package com.civicpark.dto;
 
-import java.sql.Date;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,13 +12,31 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
+/*
+ * User request DTO to add new user in database
+ * 
+ * 
+ */
+
 public class UserRequestDTO {
+	@NotBlank(message = "First name is missing (DTO)")
 	private String firstName;
+
+	@NotBlank(message = "Middle name is missing (DTO)")
 	private String middleName;
+
+	@NotBlank(message = "Last name is missing (DTO)")
 	private String lastName;
+
+	@NotBlank(message = "email is missing (DTO)")
 	private String email;
+
+	@NotBlank(message = "password is missing (DTO)")
 	private String password;
+
+	@Size(min = 10)
 	private String contactNumber;
-	private Date registeredOn;
+
+	@NotBlank(message = "address is missing (DTO)")
 	private AddressRequestDTO address;
-}	
+}
