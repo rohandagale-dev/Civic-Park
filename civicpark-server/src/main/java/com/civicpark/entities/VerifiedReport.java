@@ -40,16 +40,16 @@ public class VerifiedReport {
 	private Long reportId;
 
 	@Column(name = "user_id", nullable = false)
-	private Long userId; 
+	private Long userId;
 
-	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-	@JoinColumn(name = "something_id", referencedColumnName = "report_id", nullable = false)  //create a foreign key in evidence table
+	@OneToMany(mappedBy = "report", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<Evidence> evidences = new ArrayList<>();
+
 
 	@Column(name = "city")
 	private String city;
 
-	@Column(name = "longitude")	 
+	@Column(name = "longitude")
 	private String longitude;
 
 	@Column(name = "latitude")

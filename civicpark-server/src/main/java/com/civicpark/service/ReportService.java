@@ -1,19 +1,20 @@
 package com.civicpark.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.civicpark.custom_exceptions.ResourceNotFoundException;
+import com.civicpark.entities.Evidence;
 import com.civicpark.entities.User;
 import com.civicpark.entities.VerifiedReport;
 import com.civicpark.repository.ReportRepository;
 import com.civicpark.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -23,17 +24,27 @@ public class ReportService {
 	private final ReportRepository reportRepository;
 	private final UserRepository userRepository;
 
-	// --------------- Post New Report ---------------//
+	// ==================== Post New Report ====================//
+	@Transactional
 	public ResponseEntity<?> postReport(Long id, VerifiedReport report) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with ID: "));
+	    Optional<User> userOpt = userRepository.findById(id);
 
-		if (user == null) {
-			throw new ResourceNotFoundException("user not found");
-		} else {
-			VerifiedReport newReport = reportRepository.save(report);
-			return ResponseEntity.status(HttpStatus.CREATED).body(newReport);
-		}
+	    if (userOpt.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+	    }
+
+	    User user = userOpt.get();
+
+	    report.setCreatedAt(LocalDateTime.now());
+
+	    if (report.getEvidences() != null) {
+	        for (Evidence evidence : report.getEvidences()) {
+	            evidence.setReport(report); // set the report reference in child
+	        }
+	    }
+
+	    VerifiedReport saved = reportRepository.save(report);
+	    return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 	}
 
 	// --------------- Get Reports ---------------//

@@ -36,6 +36,9 @@ public class Address {
 
 	@Column(name = "pincode", length = 6)
 	private String pincode;
+	
+	@Column(name = "city")
+	private String city;
 
 	@Column(nullable = false, length = 50)
 	@NotBlank(message = "District is required")

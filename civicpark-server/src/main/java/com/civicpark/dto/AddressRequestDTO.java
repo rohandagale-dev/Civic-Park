@@ -1,6 +1,5 @@
 package com.civicpark.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,25 +7,27 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-
+@NoArgsConstructor
 public class AddressRequestDTO {
-	
+
     private Double flatNo;
+
     private Double streetNo;
+
     private String streetName;
+
     private String pincode;
 
-    @NotBlank(message = "District is required")
+    private String city;
+
     private String district;
 
-    @NotBlank(message = "State is required")
     private String state;
 
-    @NotBlank(message = "Country is required")
-    private String country;
+    private String country = "India";
 
     private Double latitude;
+
     private Double longitude;
 }

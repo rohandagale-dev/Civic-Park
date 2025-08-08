@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,37 +19,18 @@ import com.civicpark.entities.User;
 import com.civicpark.service.UserService;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/users")
-
+@AllArgsConstructor
 //==================== User Controller ====================//
 public class UserController {
 
 	private final UserService userService;
+	private final AuthenticationManager authenticationManager;
 
-	public UserController(UserService userService) {
-		this.userService = userService;
-	}
-
-	// =============== saving user in database controller ===============//
-	@PostMapping
-	public ResponseEntity<?> addUser(@RequestBody UserRequestDTO user) {
-
-		try {
-			User newUser = userService.addUser(user);
-
-			if (newUser == null) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User could not be created");
-			}
-			return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
-		} catch (Exception e) {
-			// Log error in a real application
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("An unexpected error occurred: " + e.getMessage());
-		}
-
-	}
+	
 
 	// =============== get all the users ===============//
 	@GetMapping

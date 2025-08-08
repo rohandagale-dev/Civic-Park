@@ -6,10 +6,15 @@ import {
 import { loginUser } from "../service/userService";
 import { Input } from "./UI/Input";
 import { Button } from "./UI/Button";
+import { useNavigate } from "react-router-dom";
+import { useAccount } from "../context/ContextProvider";
 
 const LoginForm = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
+
+  const navigate = useNavigate();
+  const { account, setAccount } = useAccount();
 
   //=============== Input Handler ==============//
   const handleChange = (e) => {
@@ -37,12 +42,24 @@ const LoginForm = () => {
     setErrors({ email: emailError, password: passwordError });
 
     if (!emailError && !passwordError) {
-      loginUser(form);
+      const submit = async () => {
+        const data = await loginUser(form);
+
+        if (data.status == 200) {
+          navigate("/dashboard");
+          setAccount(data);
+        }
+      };
+      submit();
     }
   };
 
   return (
-    <form className="flex flex-col w-80 gap-4   " onSubmit={handleSubmit} noValidate>
+    <form
+      className="flex flex-col w-80 gap-4   "
+      onSubmit={handleSubmit}
+      noValidate
+    >
       <Input
         label="Email"
         name="email"
@@ -77,7 +94,7 @@ const LoginForm = () => {
         </p>
       </div>
       <div className="mt-4">
-        <Button name="Login" />
+        <Button name="Login" onSubmit={handleSubmit} />
       </div>
     </form>
   );

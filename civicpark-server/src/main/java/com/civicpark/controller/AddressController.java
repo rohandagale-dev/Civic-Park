@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.civicpark.dto.AddressRequestDTO;
 import com.civicpark.entities.Address;
 import com.civicpark.service.AddressService;
 
@@ -37,7 +38,7 @@ public class AddressController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Address> addUser(@RequestBody Address address) {
+	public ResponseEntity<Address> addUser(@RequestBody AddressRequestDTO address) {
 		Address newAddress = addressService.addUser(address);
 
 		if (address.equals(null)) {

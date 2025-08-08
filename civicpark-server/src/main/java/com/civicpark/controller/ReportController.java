@@ -20,7 +20,7 @@ public class ReportController {
 
 	private final ReportService reportService;
 
-	// --------------- Post New Report ---------------//
+	// ==================== Post New Report ====================//
 	@PostMapping("/post/{id}")
 	public ResponseEntity<?> postReport(@PathVariable Long id, @RequestBody VerifiedReport report) {
 		return reportService.postReport(id, report);

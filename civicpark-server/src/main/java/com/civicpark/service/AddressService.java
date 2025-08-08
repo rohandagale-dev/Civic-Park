@@ -6,7 +6,9 @@ import javax.management.RuntimeErrorException;
 
 import org.springframework.stereotype.Service;
 
+import com.civicpark.dto.AddressRequestDTO;
 import com.civicpark.entities.Address;
+import com.civicpark.mapper.AddressMapper;
 import com.civicpark.repository.AddressRepository;
 
 import jakarta.transaction.Transactional;
@@ -25,13 +27,15 @@ public class AddressService {
 	}
 
 	@Transactional
-	public Address addUser(Address address) {
+	public Address addUser(AddressRequestDTO address) {
 		try {
-			return addressRepository.save(address);
+			AddressMapper mapper = new AddressMapper();
+			Address temp = mapper.toEntity(address);
+			return addressRepository.save(temp);
 		} catch (Exception e) {
-			 System.err.println("Error while saving address: " + e.getMessage());
-			 throw new RuntimeErrorException(null, "some fields are missing");
-			 
+			System.err.println("Error while saving address: " + e.getMessage());
+			throw new RuntimeErrorException(null, "some fields are missing");
+
 		}
 	}
 }

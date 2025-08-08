@@ -1,11 +1,16 @@
 import axios from "axios";
 
-const baseUrl = import.meta.VITE_REST_URL;
+// Correct way to use VITE environment variable
+const url = import.meta.env.VITE_REST_URL + "/public/login";
+
+console.log(url);
 
 export const loginUser = async (data) => {
   try {
-    const user = axios.post(baseUrl, data);
+    const response = await axios.post(url, data, { withCredentials: true });
+    return response;
   } catch (error) {
-    console.log(error);
+    console.error("Login failed:", error);
+    throw error; // forward error to the caller
   }
 };

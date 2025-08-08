@@ -6,17 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.civicpark.enums.MediaType;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,8 +19,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-
 public class Evidence {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "evidence_id")
@@ -45,5 +36,9 @@ public class Evidence {
 	@CreationTimestamp
 	@Column(updatable = false)
 	private Date createdAt;
+
+	@ManyToOne
+	@JoinColumn(name = "report_id", nullable = false)
+	private VerifiedReport report;
 
 }

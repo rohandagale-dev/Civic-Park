@@ -1,7 +1,5 @@
 package com.civicpark.config;
 
-import java.io.IOException;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +10,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.civicpark.service.UserDetailsServiceImpl;
 import com.civicpark.utils.JwtTokenProvider;
 
+import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,40 +20,33 @@ import lombok.AllArgsConstructor;
 @Component
 @AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-	private final JwtTokenProvider jwtTokenProvider;
-	private final UserDetailsServiceImpl customUserDetailsService;
+	private JwtTokenProvider jwtTokenProvider;
+	private UserDetailsServiceImpl userDetailsServiceImpl;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+			throws ServletException, IOException, java.io.IOException {
 
-		// Get JWT from Authorization header
 		String authHeader = request.getHeader("Authorization");
-
-		String jwtToken = null;
+		String token = null;
 		String username = null;
 
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
-			jwtToken = authHeader.substring(7); // Remove "Bearer "
-
+			token = authHeader.substring(7);
 			try {
-				username = jwtTokenProvider.getEmailFromToken(jwtToken);
+				username = jwtTokenProvider.extractUsername(token);
 			} catch (Exception e) {
-				System.out.println("Invalid or expired token: " + e.getMessage());
+				System.out.println("Invalid Token: " + e.getMessage());
 			}
 		}
 
-		// Authenticate the user
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-
-			if (jwtTokenProvider.validateToken(jwtToken, userDetails)) {
+			UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
+			if (jwtTokenProvider.validateToken(token, userDetails)) {
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 						null, userDetails.getAuthorities());
 
 				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
 				SecurityContextHolder.getContext().setAuthentication(authToken);
 			}
 		}
