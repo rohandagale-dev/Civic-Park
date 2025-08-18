@@ -74,7 +74,7 @@ public class RtoOfficeController {
 	}
 
 	// ================== Verify Me ==================//
-	@GetMapping("/verify-me")
+	@PostMapping("/verify-me")
 	public ResponseEntity<?> verifyMe() {
 		return ResponseEntity.status(HttpStatus.OK).body("user verified");
 	}

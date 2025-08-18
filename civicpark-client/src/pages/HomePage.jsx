@@ -18,12 +18,12 @@ export const HomePage = () => {
       <div className="flex flex-row gap-4">
         <div>
           <a href="/login">
-            <Button name="Login" />
+            <Button name="Login">Login</Button>
           </a>
         </div>
         <div>
           <a href="/login">
-            <Button name="Register" />
+            <Button name="Register" >Sign Up</Button>
           </a>
         </div>
       </div>

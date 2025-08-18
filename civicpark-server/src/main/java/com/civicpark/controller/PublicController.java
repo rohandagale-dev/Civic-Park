@@ -1,6 +1,9 @@
 package com.civicpark.controller;
 
+import java.net.http.HttpHeaders;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +16,10 @@ import com.civicpark.dto.LoginRequestDTO;
 import com.civicpark.dto.RtoLoginDTO;
 import com.civicpark.dto.UserRequestDTO;
 import com.civicpark.entities.User;
+import com.civicpark.repository.UserRepository;
 import com.civicpark.service.RtoOfficeService;
 import com.civicpark.service.UserService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -29,52 +32,44 @@ public class PublicController {
 	private final UserService userService;
 	private final AuthenticationManager authenticationManager;
 	private final RtoOfficeService service;
+	private final UserRepository repository;
 
 	// ==================== Health Check ====================//
-	@GetMapping("/login")
+	@GetMapping("/health")
 	public String login(HttpServletRequest request) {
 		return "hello world" + request.getSession().getId();
 	}
 
-	// ==================== Login User ====================//
-	@PostMapping("/login")
+	// ==================== Login RTO User ====================//
+	@PostMapping("/user/login")
 	public ResponseEntity<?> addUser(@RequestBody LoginRequestDTO dto, HttpServletResponse response) {
 		try {
-			String token = userService.loginUser(dto);
-
-			// Create the cookie
-			Cookie cookie = new Cookie("token", token);
-			cookie.setHttpOnly(true); // Prevents JavaScript access (XSS protection)
-			cookie.setSecure(true); // Send only over HTTPS (set false in local dev)
-			cookie.setPath("/"); // Cookie available for all paths
-			cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days in seconds
-
-			// Add cookie to response
-			response.addCookie(cookie);
-
-			return ResponseEntity.ok("Login successful");
+			return ResponseEntity.status(HttpStatus.OK).body(userService.loginUserAndSetCookie(dto, response));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Something went wrong");
 		}
 	}
 
 	// ==================== Login RTO Office ====================//
-	@PostMapping("/rto/rto-office")
+	@PostMapping("/rto/login")
 	public ResponseEntity<?> loginRtoOffice(@RequestBody RtoLoginDTO dto, HttpServletResponse response) {
 		try {
 			String token = service.loginRtoOffice(dto);
-			Cookie cookie = new Cookie("token", token);
-			cookie.setHttpOnly(true); // Prevents JavaScript access (XSS protection)
-			cookie.setSecure(true); // Send only over HTTPS (set false in local dev)
-			cookie.setPath("/"); // Cookie available for all paths
-			cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days in seconds
+
+			// Create cookie with SameSite=None for cross-origin requests
+			ResponseCookie cookie = ResponseCookie.from("token", token).httpOnly(false) // prevent JavaScript access
+					.secure(false) // set to true in production with HTTPS
+					.sameSite("Lax") // required for cross-origin cookies
+					.path("/").maxAge(7 * 24 * 60 * 60) // 7 days
+					.build();
 
 			// Add cookie to response
-			response.addCookie(cookie);
-			return ResponseEntity.ok("Login successful");
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Something went wrong");
+			response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
 
+			return ResponseEntity.ok("Login successful");
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Something went wrong: " + e.getMessage());
 		}
 	}
 

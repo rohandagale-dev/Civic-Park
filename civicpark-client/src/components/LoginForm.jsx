@@ -43,11 +43,13 @@ const LoginForm = () => {
 
     if (!emailError && !passwordError) {
       const submit = async () => {
-        const data = await loginUser(form);
-
-        if (data.status == 200) {
-          navigate("/dashboard");
-          setAccount(data);
+        try {
+          const res = await loginUser(form);
+          setAccount(res.data);
+          localStorage.setItem("userId", res.data.userId);
+          navigate("/rto-user");
+        } catch (error) {
+          console.log("inside login page failed");
         }
       };
       submit();
@@ -60,6 +62,7 @@ const LoginForm = () => {
       onSubmit={handleSubmit}
       noValidate
     >
+      <p>this is login form</p>
       <Input
         label="Email"
         name="email"
@@ -94,7 +97,9 @@ const LoginForm = () => {
         </p>
       </div>
       <div className="mt-4">
-        <Button name="Login" onSubmit={handleSubmit} />
+        <Button name="Login" onSubmit={handleSubmit}>
+          Login
+        </Button>
       </div>
     </form>
   );

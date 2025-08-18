@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.civicpark.enums.ReportStatus;
+import com.civicpark.enums.ReportType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -42,17 +43,26 @@ public class VerifiedReport {
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
+	@Column(name = "vehicle_number")
+	private String vehicleNumber;
+
+	@Column(name = "vehicle_color")
+	private String vehicleColor;
+
+	@Column(name = "report_type")
+	@Enumerated(EnumType.STRING)
+	private ReportType reportType;
+
 	@OneToMany(mappedBy = "report", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<Evidence> evidences = new ArrayList<>();
 
+	@Column(name = "address")
+	private Address address;
 
-	@Column(name = "city")
-	private String city;
-
-	@Column(name = "longitude")
+	@Column(name = "longitude", nullable = true)
 	private String longitude;
 
-	@Column(name = "latitude")
+	@Column(name = "latitude", nullable = true)
 	private String latitude;
 
 	@CreationTimestamp
@@ -60,7 +70,7 @@ public class VerifiedReport {
 	private LocalDateTime createdAt;
 
 	@Enumerated(EnumType.STRING)
-	private ReportStatus reportStatus;
+	private ReportStatus reportStatus = ReportStatus.PENDING;
 
 	@Column(name = "verified_by")
 	private Long verifiedBy;

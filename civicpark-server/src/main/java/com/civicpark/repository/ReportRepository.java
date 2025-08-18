@@ -8,4 +8,5 @@ import com.civicpark.entities.VerifiedReport;
 
 public interface ReportRepository extends JpaRepository<VerifiedReport, Long> {
 	public List<?> findByCity(String city);
+	
 }

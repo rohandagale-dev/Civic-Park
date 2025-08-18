@@ -10,7 +10,8 @@ module.exports = {
       colors: {
         primary: "#673AB7", // primary text color purple
         primarytext: "#1a1a1a",
-        secondarytext:"#F8F8F8"
+        secondarytext:"#F8F8F8",
+        primarybg: "#F0F4F9"
       },
     },
   },
