@@ -22,7 +22,7 @@ export const HomePage = () => {
           </a>
         </div>
         <div>
-          <a href="/login">
+          <a href="/signup">
             <Button name="Register" >Sign Up</Button>
           </a>
         </div>

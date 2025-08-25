@@ -1,32 +1,35 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../UI/Input";
 import { Checkbox } from "@mui/material";
-import { uploadImageToS3 } from "../../service/AwsService";
+import { generatePreSignedURL, uploadImageToS3 } from "../../service/AwsService";
 import { ErrorLabel } from "../shared-components/ErrorLabel";
-import { Button } from "../UI/Button";
-import {
-  validateStep1,
-  validateStepTwo,
-} from "../../utils/validators/reportFormValidator";
+import { validateStep1, validateStepTwo } from "../../utils/validators/reportFormValidator";
 import { addNewReport } from "../../service/reportService";
 
 const ReportForm = () => {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
+    userId: 1,
     vehicleNumber: "",
     vehicleColor: "",
-    reportType: "",
-    longitude: "",
-    latitude: "",
-    street: "",
+    reportType: "PARKING",
+    reportStatus: "VERIFIED",
+    evidenceFiles: [],
+  });
+  const [address, setAddress] = useState({
+    flatNo: "",
+    streetNo: "",
+    streetName: "",
     city: "",
     state: "",
     pincode: "",
-    country: "",
-    address: "",
-    evidenceFiles: [],
+    country: "India",
+    longitude: "",
+    latitude: "",
+    district: "thane",
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   // ==================== Handle Input Change ====================//
   const handleChange = (e) => {
@@ -48,11 +51,19 @@ const ReportForm = () => {
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
 
-    const responseURL = await uploadImageToS3(files);
+    // Generate unique file name
+    const timestamp = Date.now();
+    const safeName = files[0].name.replace(/\s/g, "-"); // replace spaces with hyphens
+    const newFileName = `${timestamp}-${safeName}`;
 
-    const newEvidenceFiles = files.map((file) => ({
-      mediaUrl: responseURL,
-      mediaType: file.type,
+    setLoading(true);
+    const preSignedURL = await generatePreSignedURL(files, newFileName);
+
+    const bucketImageURL = await uploadImageToS3(preSignedURL, files[0], newFileName)
+    const newEvidenceFiles = files.map(() => ({
+      mediaUrl: bucketImageURL,
+      mediaType: "IMAGE",
+      objectKey: newFileName,
     }));
 
     setForm((prev) => ({
@@ -61,29 +72,38 @@ const ReportForm = () => {
     }));
   };
 
-  // ==================== Handle Input Validation ====================//
+  // ==================== Handle Address Change ====================//
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setAddress((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   // ==================== Handle Form Steps ====================//
-  const handleNext = () => {
-    if (step == 1) {
+  const handleNext = (e) => {
+    if (e) e.preventDefault();
+    if (step === 1) {
       const validationErrors = validateStep1(form);
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
         return;
       }
-    } else if (step == 2) {
-      const validationErrors = validateStepTwo(form);
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
-      }
+    } else if (step === 2) {
+      // const validationErrors = validateStepTwo(address);
+      // if (Object.keys(validationErrors).length > 0) {
+      //   setErrors(validationErrors);
+      //   return;
+      // }
     }
-    console.log("validated");
+    setErrors({});
     setStep((step) => step + 1);
   };
 
-  const handlePrevious = () => {
-    setStep((step) => (step === 1 ? (step = step) : step - 1));
+  const handlePrevious = (e) => {
+    if (e) e.preventDefault();
+    setStep((step) => (step === 1 ? step : step - 1));
   };
 
   // ==================== Handle Form Submit ====================//
@@ -91,26 +111,25 @@ const ReportForm = () => {
     e.preventDefault();
 
     const reportPayload = {
-      reportType: form.reportType,
+      userId: 3,
+      reportStatus: "VERIFIED",
+      verifiedBy: 999,
+      reportType: "PARKING",
       vehicleNumber: form.vehicleNumber,
       vehicleColor: form.vehicleColor,
-      city: form.city,
-      street: form.street,
-      state: form.state,
-      pincode: form.pincode,
-      country: form.country,
-      longitude: "12.2333",
-      latitude: "12.33455",
-
+      address: address,
       evidences: form.evidenceFiles.map((file) => ({
         mediaUrl: file.mediaUrl,
         mediaType: file.mediaType,
+        objectKey: file.objectKey,
       })),
     };
+    // Optionally validate here too
     console.log(reportPayload);
     const id = localStorage.getItem("userId");
     const response = await addNewReport(reportPayload, id);
     console.log(response);
+    // Optionally handle response, reset, close form
   };
 
   // ==================== Use Effect ====================//
@@ -118,10 +137,10 @@ const ReportForm = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setForm((prev) => ({
+          setAddress((prev) => ({
             ...prev,
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+            latitude: position.coords.latitude.toString(),
+            longitude: position.coords.longitude.toString(),
           }));
         },
         (error) => {
@@ -164,7 +183,7 @@ const ReportForm = () => {
           />
           {errors.vehicleColor && <ErrorLabel text={errors.vehicleColor} />}
           <div className="flex justify-end">
-            <button name="Next" onClick={handleNext}>
+            <button type="button" name="Next" onClick={handleNext}>
               Next
             </button>
           </div>
@@ -178,55 +197,61 @@ const ReportForm = () => {
           <div className="flex flex-row gap-4">
             <div className="flex flex-col">
               <Input
-                label="Street"
-                name="street"
-                value={form.street}
-                onChange={handleChange}
+                label="Flat No / Shop No / House No"
+                name="flatNo"
+                value={address.flatNo}
+                onChange={handleAddressChange}
               />
-              {errors.street && <ErrorLabel text={errors.street} />}
+              {errors.flatNo && <ErrorLabel text={errors.flatNo} />}
               <Input
-                label="City"
-                name="city"
-                value={form.city}
-                onChange={handleChange}
+                label="Street No"
+                name="streetNo"
+                value={address.streetNo}
+                onChange={handleAddressChange}
               />
+              {errors.streetNo && <ErrorLabel text={errors.streetNo} />}
+              <Input
+                label="Street Name"
+                name="streetName"
+                value={address.streetName}
+                onChange={handleAddressChange}
+              />
+              {errors.streetName && <ErrorLabel text={errors.streetName} />}
+            </div>
+            <div className="flex flex-col">
+              <Input label="City" name="city" value={address.city} onChange={handleAddressChange} />
               {errors.city && <ErrorLabel text={errors.city} />}
               <Input
                 label="State"
                 name="state"
-                value={form.state}
-                onChange={handleChange}
+                value={address.state}
+                onChange={handleAddressChange}
               />
               {errors.state && <ErrorLabel text={errors.state} />}
-            </div>
-            <div className="flex flex-col">
               <Input
                 label="Pincode"
                 name="pincode"
-                value={form.pincode}
-                onChange={handleChange}
+                value={address.pincode}
+                onChange={handleAddressChange}
               />
               {errors.pincode && <ErrorLabel text={errors.pincode} />}
               <Input
                 label="Country"
                 name="country"
-                value={form.country}
-                onChange={handleChange}
+                value={address.country}
+                onChange={handleAddressChange}
               />
               {errors.country && <ErrorLabel text={errors.country} />}
             </div>
           </div>
           <div>
-            <Checkbox />{" "}
-            <span className="text-sm text-gray-500 mt-2">
-              Same as my address
-            </span>
+            <Checkbox /> <span className="text-sm text-gray-500 mt-2">Same as my address</span>
           </div>
           <div className="flex flex-row justify-between">
-            <button name="Back" onClick={handlePrevious}>
+            <button type="button" name="Back" onClick={handlePrevious}>
               Back
             </button>
-            <button name="Next" onClick={handleNext}>
+            <button type="button" name="Next" onClick={handleNext}>
               Next
             </button>
           </div>
@@ -249,12 +274,15 @@ const ReportForm = () => {
             {form.evidenceFiles.length} image(s) selected
           </div>
           <div className="flex justify-between mt-4">
-            <button name="Back" onClick={handlePrevious}>
+            <button type="button" name="Back" onClick={handlePrevious}>
               Back
             </button>
-            <button name="Submit Report" type="submit" onClick={handleSubmit}>
+            <button type="submit" name="Submit Report">
               Submit
             </button>
+          </div>
+          <div className={`fixed top-8 right-8 ${loading ? "block" : "hidden"}`}>
+            <div className="h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
       )}

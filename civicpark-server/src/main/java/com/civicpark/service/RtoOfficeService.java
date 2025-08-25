@@ -2,36 +2,45 @@ package com.civicpark.service;
 
 import java.util.List;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.civicpark.ParkingTicketSystemApplication;
-import com.civicpark.custom_exceptions.BadCredentialsException;
 import com.civicpark.custom_exceptions.ResourceConflictException;
 import com.civicpark.custom_exceptions.ResourceNotFoundException;
-import com.civicpark.dto.RtoLoginDTO;
+import com.civicpark.dto.RtoCookieDTO;
 import com.civicpark.dto.RtoRequestDTO;
 import com.civicpark.dto.RtoResponseDTO;
 import com.civicpark.entities.RtoOffice;
 import com.civicpark.mapper.RtoOfficeMapper;
 import com.civicpark.repository.RtoOfficeRepository;
 import com.civicpark.utils.JwtTokenProvider;
+import com.civicpark.utils.RtoUsernamePasswordAuthenticationToken;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
 public class RtoOfficeService {
-
-	private final ParkingTicketSystemApplication parkingTicketSystemApplication;
 	private final RtoOfficeRepository repository;
 	private final RtoOfficeMapper mapper;
 	private final PasswordEncoder encoder;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final AuthenticationManager authenticationManager;
 
-
-	// ================== RTO Registration ==================//
+	// =====================================================================//
+	/**
+	 * Service to register new RTO Office.
+	 * 
+	 * @param dto
+	 * @return
+	 */
 	public RtoResponseDTO registerNewOffice(@RequestBody RtoRequestDTO dto) {
 		if (repository.findByEmail(dto.getEmail()) != null) {
 			throw new ResourceConflictException("RTO office already exists");
@@ -44,27 +53,66 @@ public class RtoOfficeService {
 		return mapper.toDTO(saved);
 	}
 
-	// ================== RTO Login ==================//
-	public String loginRtoOffice(RtoLoginDTO dto) {
-		RtoOffice rtoOffice = repository.findByEmail(dto.getEmail());
+	// ========================================================================================//
+	/**
+	 * Authenticate RTO office and Generate Jwt token
+	 * 
+	 * @param dto
+	 * @param response
+	 * @return cookie
+	 */
+	public RtoResponseDTO loginRtoAndSetCookie(RtoCookieDTO dto, HttpServletResponse response) {
+		Authentication authentication = authenticationManager
+				.authenticate(new RtoUsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
 
-		if (rtoOffice == null) {
-			throw new ResourceNotFoundException("RTO office does not exist");
-		}
-		
-		if(!encoder.matches(dto.getPassword(), rtoOffice.getPassword())) {
-			System.out.println("Wrong password");
-			throw new BadCredentialsException("Incorrect password");
-		}
+		// Holds authentication object
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		RtoResponseDTO response = mapper.toDTO(rtoOffice);
-		
-		return jwtTokenProvider.generateRtoToken(response);
+		UserDetails rtoDetails = (UserDetails) authentication.getPrincipal();
+
+
+		// RTO office details
+		RtoOffice rto = repository.findByEmail(dto.getEmail());
+		RtoResponseDTO responseDTO = mapper.toDTO(rto);
+
+		// Generate string
+		String token = jwtTokenProvider.generateTokenForRTO(rtoDetails);
+
+		// Set cookie
+		Cookie cookie = new Cookie("token", token);
+		cookie.setHttpOnly(true);
+		cookie.setSecure(false);
+		cookie.setPath("/");
+		cookie.setMaxAge(7 * 24 * 60 * 60);
+		cookie.setAttribute("SameSite", "None");
+		response.addCookie(cookie);
+
+		return responseDTO;
 	}
 
-	// ================== List Officeses ==================//
+	// ================================================================//
+	/**
+	 * Find Rto office by id
+	 * 
+	 * @param id
+	 * @return dto
+	 */
+	public RtoResponseDTO getRtoDetailsById(Long id) {
+		RtoOffice rtoOffice = repository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Rto office doesn't exist"));
+
+		return mapper.toDTO(rtoOffice);
+	}
+
+	// ============================================//
+	/**
+	 * List all RTO offices
+	 * 
+	 * @return list
+	 */
 	public List<RtoOffice> getListOfOffice() {
 		List<RtoOffice> list = repository.findAll();
 		return list;
 	}
+
 }

@@ -22,6 +22,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
+/**
+ * Handles all User-related operations such as profile and logout. Exposes REST
+ * APIs under `/user`.
+ */
 @RestController
 @RequestMapping("/user")
 @AllArgsConstructor
@@ -42,7 +46,13 @@ public class UserController {
 		return ResponseEntity.ok(HttpStatus.OK);
 	}
 
-	// =============== Get User By Id ===============//
+	// ==================================================================================//
+	/**
+	 * Fetches a user's profile by ID.
+	 *
+	 * @param id User ID
+	 * @return ResponseEntity with User details
+	 */
 	@GetMapping("/profile/{id}")
 	public ResponseEntity<?> getUserById(@PathVariable Long id) {
 		try {
@@ -52,22 +62,23 @@ public class UserController {
 		}
 	}
 
-	// ==================== Verify Me ====================//
-	@PostMapping("/verify-me")
-	public ResponseEntity<?> verifyMe() {
-		return ResponseEntity.status(HttpStatus.OK).body("something is fishy");
-	}
-
-	// =============== Logout User ===============//
+	// ===================================================================================//
+	/**
+	 * Logs out the currently authenticated user by clearing the authentication
+	 * cookie.
+	 * 
+	 * @param response
+	 * @return 200 OK with a success message
+	 */
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(HttpServletResponse response) {
-	    Cookie cookie = new Cookie("token", null);
-	    cookie.setMaxAge(0); // expires immediately
-	    cookie.setPath("/");
-	    cookie.setHttpOnly(true); 
-	    cookie.setSecure(true); // if using HTTPS
-	    response.addCookie(cookie);
-	    return ResponseEntity.ok("Logged out successfully");
+		Cookie cookie = new Cookie("token", null);
+		cookie.setMaxAge(0); // Expires immediately
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+		cookie.setSecure(false); // HTTPS only, change value "true" in production
+		response.addCookie(cookie);
+		return ResponseEntity.ok("Logged out successfully");
 	}
 
 }

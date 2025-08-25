@@ -3,6 +3,7 @@ package com.civicpark.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import com.civicpark.dto.RtoCookieDTO;
 import com.civicpark.dto.RtoRequestDTO;
 import com.civicpark.dto.RtoResponseDTO;
 import com.civicpark.entities.RtoOffice;
@@ -15,4 +16,6 @@ public interface RtoOfficeMapper {
 	RtoResponseDTO toDTO(RtoOffice entity);
 
 	RtoOffice toEntity(RtoRequestDTO dto);
+	
+	RtoCookieDTO toCookieDTO(RtoCookieDTO rto);
 }

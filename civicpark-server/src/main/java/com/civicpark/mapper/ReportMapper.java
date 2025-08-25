@@ -1,23 +1,25 @@
 package com.civicpark.mapper;
 
-import com.civicpark.dto.EvidenceResponseDTO;
-import com.civicpark.dto.ReportResponseDTO;
-import com.civicpark.entities.VerifiedReport;
-import com.civicpark.entities.Evidence;
+import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-import java.util.List;
+import com.civicpark.dto.ReportCreateRequestDTO;
+import com.civicpark.dto.ReportResponseDTO;
+import com.civicpark.entities.Report;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { EvidenceMapper.class, UserMapper.class })
 public interface ReportMapper {
 
 	ReportMapper INSTANCE = Mappers.getMapper(ReportMapper.class);
 
-	ReportResponseDTO toDto(VerifiedReport report);
+	// RequestDTO -> Entity
+	Report toEntity(ReportCreateRequestDTO dto);
 
-	List<ReportResponseDTO> toDtoList(List<VerifiedReport> reports);
+	// Entity -> ResponseDTO
+	ReportResponseDTO toDto(Report report);
 
-	EvidenceResponseDTO toEvidenceDto(Evidence evidence);
+	// List<Entity> -> List<ResponseDTO>
+	List<ReportResponseDTO> toDtoList(List<Report> reports);
 }

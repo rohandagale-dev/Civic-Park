@@ -11,15 +11,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.civicpark.custom_exceptions.ResourceConflictException;
 import com.civicpark.custom_exceptions.ResourceNotFoundException;
-import com.civicpark.dto.LoginRequestDTO;
+import com.civicpark.dto.UserLoginRequestDTO;
 import com.civicpark.dto.UpdatePasswordRequest;
-import com.civicpark.dto.UserRequestDTO;
+import com.civicpark.dto.UserRegistrationRequestDTO;
 import com.civicpark.dto.UserResponseDTO;
 import com.civicpark.entities.User;
 import com.civicpark.mapper.UserMapper;
-import com.civicpark.mapper.UserMapperStruct;
-import com.civicpark.mapper.UserMapperStructImpl;
 import com.civicpark.repository.UserRepository;
 import com.civicpark.utils.JwtTokenProvider;
 
@@ -30,6 +29,10 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
+/**
+ * User service handles all user related service including post user, get user,
+ * patch user etc.
+ */
 public class UserService {
 
 	private final UserRepository userRepository;
@@ -37,32 +40,41 @@ public class UserService {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final AuthenticationManager authenticationManager;
 	private final UserDetailsServiceImpl userDetailsServiceImpl;
-	private final UserMapperStruct mapper;
+	private final UserMapper userMapper;
 
-	// ==================== Register New User ====================//
+	// ==================================================================//
+	/**
+	 * Insert new user into database
+	 * 
+	 * @param dto
+	 * @return dto
+	 */
 	@Transactional
-	public User addUser(UserRequestDTO user) {
-		User exitingUser = userRepository.findByEmail(user.getEmail());
-
-		UserMapper userMapper = new UserMapper();
-
-		User mappedUser = userMapper.toEntity(user); // DTO to Entity
-		mappedUser.setPassword(passwordEncoder.encode(user.getPassword()));
-
-		if (exitingUser == null) {
-			try {
-				User newUser = userRepository.save(mappedUser);
-				return newUser;
-			} catch (Exception e) {
-				throw new RuntimeErrorException(null, "Error while saving the user");
-			}
-		} else {
-			throw new RuntimeErrorException(null, "User already exists");
+	public UserResponseDTO addUser(UserRegistrationRequestDTO dto) {
+		// Check is user already exist
+		User existingUser = userRepository.findByEmail(dto.getEmail());
+		System.out.println(dto.getEmail());
+		if (existingUser != null) {
+			throw new ResourceConflictException("user already exists with email: " + dto.getEmail());
 		}
+
+		User user = userMapper.toEntity(dto);
+		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+		User savedUser = userRepository.save(user);
+
+		return userMapper.toDto(savedUser);
 	}
 
-	// ==================== Login RTO User ====================//
-	public UserResponseDTO loginUserAndSetCookie(LoginRequestDTO dto, HttpServletResponse response) {
+	// ================================================================================================//
+	/**
+	 * This method is used to authenticate user and generate cookie
+	 * 
+	 * @param dto
+	 * @param response
+	 * @return responseDTO
+	 */
+	public UserResponseDTO loginUserAndSetCookie(UserLoginRequestDTO dto, HttpServletResponse response) {
 		// Authenticate the user first
 		org.springframework.security.core.Authentication authentication = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
@@ -74,7 +86,7 @@ public class UserService {
 		UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(dto.getEmail());
 
 		User user = userRepository.findByEmail(dto.getEmail());
-		UserResponseDTO responseDto = mapper.userToUserResponseDTO(user);
+		UserResponseDTO responseDTO = userMapper.toDto(user);
 
 		// Generate token
 		String token = jwtTokenProvider.generateToken(userDetails);
@@ -82,12 +94,12 @@ public class UserService {
 		// Set Token
 		Cookie cookie = new Cookie("token", token);
 		cookie.setHttpOnly(true);
-		cookie.setSecure(true); // HTTPS only
+		cookie.setSecure(false); // HTTPS only
 		cookie.setPath("/");
 		cookie.setMaxAge(7 * 24 * 60 * 60);
 		response.addCookie(cookie);
 
-		return responseDto;
+		return responseDTO;
 	}
 
 //	// ==================== Get User Object ====================//
@@ -131,10 +143,10 @@ public class UserService {
 		return user;
 	}
 
-	// ==================== Find User By Id ====================//
+	// ==========================================================================================================//
 	public UserResponseDTO getUserById(Long id) {
 		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("user does not exist"));
-		UserResponseDTO responseUser = mapper.userToUserResponseDTO(user);
+		UserResponseDTO responseUser = userMapper.toDto(user);
 		return responseUser;
 	}
 }

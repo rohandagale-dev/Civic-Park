@@ -19,11 +19,15 @@ import lombok.Setter;
 @Getter
 @Setter
 
+/**
+ * Address Entity consist of 11 Attributes including address_id. 2 attributes
+ * which can be nullable. 9 attributes are not null.
+ */
 public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "address_id")
-	private Long addressId;
+	private Long address_id;
 
 	@Column(name = "flat_number", length = 20)
 	private Double flatNo;
@@ -36,7 +40,7 @@ public class Address {
 
 	@Column(name = "pincode", length = 6)
 	private String pincode;
-	
+
 	@Column(name = "city")
 	private String city;
 
@@ -52,10 +56,10 @@ public class Address {
 	@NotBlank(message = "Country is required")
 	private String country = "India";
 
-	@Column(name = "latitude")
+	@Column(name = "latitude", nullable = true)
 	private Double latitude;
 
-	@Column(name = "longitude")
+	@Column(name = "longitude", nullable = true)
 	private Double longitude;
 
 }

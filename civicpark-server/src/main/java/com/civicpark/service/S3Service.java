@@ -3,52 +3,56 @@ package com.civicpark.service;
 import java.net.URL;
 import java.time.Duration;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 @Service
-@AllArgsConstructor
-@NoArgsConstructor
 public class S3Service {
 
-//    @Value("${aws.s3.bucket}")
-    private String bucketName;
+	private final S3Presigner presigner;
 
-//    @Value("${aws.s3.access-key}")
-    private String accessKey;
+	@Value("${AWS_BUCKET}")
+	private String bucketName;
 
-//    @Value("${aws.s3.secret-key}")
-    private String secretKey;
+	@Value("${AWS_REGION}")
+	private String region;
 
-//    @Value("${aws.s3.region}")
-    private String region;
+	public S3Service(S3Presigner presigner) {
+		this.presigner = presigner;
+	}
 
-    public URL generatePresignedUrl(String fileName, String contentType) {
-        S3Presigner presigner = S3Presigner.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
-                .build();
+	// ==========================================================================//
+	/**
+	 * Generate pre-signed PUT URL for uploading a file to S3
+	 */
+	public URL generatePresignedUploadUrl(String fileName, String contentType) {
+		PutObjectRequest objectRequest = PutObjectRequest.builder().bucket(bucketName).key(fileName)
+				.contentType(contentType).build();
 
-        PutObjectRequest objectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .contentType(contentType)
-                .build();
+		PresignedPutObjectRequest presignedRequest = presigner
+				.presignPutObject(p -> p.putObjectRequest(objectRequest).signatureDuration(Duration.ofMinutes(10)));
 
-        PresignedPutObjectRequest presignedRequest =
-                presigner.presignPutObject(p -> p.signatureDuration(Duration.ofMinutes(10))
-                        .putObjectRequest(objectRequest));
+		return presignedRequest.url();
+	}
 
-        presigner.close();
-        return presignedRequest.url();
-    }
+	// =============================================================================================================//
+	/**
+	 * Generate pre-signed GET URL for downloading/viewing a file from S3
+	 */
+	public String generatePresignedGetUrl(String objectKey) {
+		GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+
+		GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder().getObjectRequest(getObjectRequest)
+				.signatureDuration(Duration.ofMinutes(60)).build();
+
+		return presigner.presignGetObject(presignRequest).url().toString();
+	}
 }

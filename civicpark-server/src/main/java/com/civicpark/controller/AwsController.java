@@ -20,9 +20,17 @@ import lombok.AllArgsConstructor;
 public class AwsController {
 	private final S3Service s3Service;
 
+	// ========================================================================================================//
+	/**
+	 * Generate aws-s3 presigned url
+	 * 
+	 * @param fileName
+	 * @param contentType
+	 * @return presigned url
+	 */
 	@GetMapping("/aws-s3/presigned-url")
 	public ResponseEntity<?> getPresignedUrl(@RequestParam String fileName, @RequestParam String contentType) {
-		URL url = s3Service.generatePresignedUrl(fileName, contentType);
+		URL url = s3Service.generatePresignedUploadUrl(fileName, contentType);
 		return ResponseEntity.ok(Map.of("url", url));
 	}
 }

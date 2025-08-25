@@ -1,12 +1,12 @@
 package com.civicpark.entities;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
-import com.civicpark.dto.UpdatePasswordRequest;
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,6 +28,9 @@ import lombok.Setter;
 @Getter
 @Setter
 
+/**
+ * 9 attributes including user_id. Every attributes are strictly not null.
+ */
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,8 +58,10 @@ public class User {
 	private String contactNumber;
 
 	@Column(updatable = false)
+	@CreationTimestamp
 	private LocalDateTime createdAt;
 
+	@Embedded
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "address_id", referencedColumnName = "address_id", nullable = false)
 	private Address address;

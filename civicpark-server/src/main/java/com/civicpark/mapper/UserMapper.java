@@ -1,20 +1,25 @@
 package com.civicpark.mapper;
 
-import com.civicpark.dto.UserRequestDTO;
+import com.civicpark.dto.UserRegistrationRequestDTO;
+import com.civicpark.dto.UserResponseDTO;
 import com.civicpark.entities.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-public class UserMapper {
-	public User toEntity(UserRequestDTO dto) {
-		AddressMapper addressMapper = new AddressMapper();
+import java.util.List;
 
-		User user = new User();
-		user.setFirstName(dto.getFirstName());
-		user.setMiddleName(dto.getMiddleName());
-		user.setLastName(dto.getLastName());
-		user.setEmail(dto.getEmail());
-		user.setPassword(dto.getPassword());
-		user.setContactNumber(dto.getContactNumber());
-		user.setAddress(addressMapper.toEntity(dto.getAddress()));
-		return user;
-	}
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+
+	UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+
+	// RequestDTO -> Entity
+	User toEntity(UserRegistrationRequestDTO dto);
+
+	// Entity -> ResponseDTO
+	UserResponseDTO toDto(User user);
+	
+
+	// List<Entity> -> List<ResponseDTO>
+	List<UserResponseDTO> toDtoList(List<User> users);
 }

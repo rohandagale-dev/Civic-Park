@@ -2,6 +2,9 @@ import React from "react";
 import ReportForm from "../../components/User/ReportForm";
 
 export const ReportPage = () => {
+
+
+  
   return (
     <div className="flex flex-col items-center justify-center h-screen w-full gap-6">
       <div>

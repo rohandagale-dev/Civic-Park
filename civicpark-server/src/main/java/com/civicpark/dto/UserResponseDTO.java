@@ -21,5 +21,5 @@ public class UserResponseDTO {
     private String email;
     private String contactNumber;
     private LocalDateTime createdAt;
-    private Address address;
+    private AddressResponseDTO address;
 }

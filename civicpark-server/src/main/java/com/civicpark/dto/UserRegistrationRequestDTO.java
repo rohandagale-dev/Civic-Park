@@ -13,12 +13,11 @@ import lombok.Setter;
 @AllArgsConstructor
 
 /*
- * User request DTO to add new user in database
+ * User registration request DTO to add new user in database
  * 
  * 
  */
-
-public class UserRequestDTO {
+public class UserRegistrationRequestDTO {
 	@NotBlank(message = "First name is missing (DTO)")
 	private String firstName;
 

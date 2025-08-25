@@ -3,12 +3,9 @@ package com.civicpark.entities;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hibernate.annotations.CreationTimestamp;
-
 import com.civicpark.enums.ReportStatus;
 import com.civicpark.enums.ReportType;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,14 +25,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "verified_reports")
+@Table(name = "report")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-
-public class VerifiedReport {
-
+public class Report {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "report_id")
@@ -56,14 +52,9 @@ public class VerifiedReport {
 	@OneToMany(mappedBy = "report", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<Evidence> evidences = new ArrayList<>();
 
-	@Column(name = "address")
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "address_id", referencedColumnName = "address_id", nullable = false)
 	private Address address;
-
-	@Column(name = "longitude", nullable = true)
-	private String longitude;
-
-	@Column(name = "latitude", nullable = true)
-	private String latitude;
 
 	@CreationTimestamp
 	@Column(updatable = false)

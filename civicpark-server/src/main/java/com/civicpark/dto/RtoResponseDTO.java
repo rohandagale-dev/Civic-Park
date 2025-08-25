@@ -11,8 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RtoResponseDTO {
 
-	private Long id;
-	private String officeName;
+	private Long rtoId;
+	private String name;
 	private String email;
 	private String contactNumber;
 	private String city;

@@ -1,6 +1,6 @@
 package com.civicpark.entities;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -30,15 +30,18 @@ public class Evidence {
 	@Column(name = "media_type", nullable = false)
 	private MediaType mediaType;
 
-	@Column(name = "media_url", nullable = false)
+	@Column(name = "media_url", nullable = false, length = 1000)
 	private String mediaUrl;
+	
+	@Column(name = "object_key", nullable  = false)
+	private String objectKey;
 
 	@CreationTimestamp
 	@Column(updatable = false)
-	private Date createdAt;
+	private LocalDateTime createdAt;
 
 	@ManyToOne
 	@JoinColumn(name = "report_id", nullable = false)
-	private VerifiedReport report;
+	private Report report;
 
 }

@@ -1,7 +1,5 @@
 package com.civicpark.service;
 
-import java.util.Collections;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,9 +24,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			throw new UsernameNotFoundException("User not found with email: " + email);
 		}
 
-		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
-				Collections.emptyList()
-		);
+		// Here we map your User entity → Spring Security’s UserDetails
+		return org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
+				.password(user.getPassword())
+				.build();
 	}
 }
-	

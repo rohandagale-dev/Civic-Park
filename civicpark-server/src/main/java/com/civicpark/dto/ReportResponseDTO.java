@@ -14,16 +14,20 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+
+/**
+ * Report response DTO, Requested by RTO Dashboard return Report Object
+ */
 public class ReportResponseDTO {
 	private Long reportId;
 	private Long userId;
 	private List<EvidenceResponseDTO> evidences;
 	private String vehicleNumber;
 	private String vehicleColor;
-	private String city;
 	private String longitude;
 	private String latitude;
 	private LocalDateTime createdAt;
 	private ReportStatus reportStatus;
+	private AddressResponseDTO address;
 	private Long verifiedBy;
 }

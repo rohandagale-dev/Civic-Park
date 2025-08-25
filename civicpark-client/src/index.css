@@ -3,11 +3,25 @@
 @tailwind utilities;
 
 :root {
-  font-family: SF Pro Display, SF Pro Icons, Helvetica Neue, Helvetica, Arial,
+  font-family:
+    Circular,
+    custom-font,
+    Helvetica Neue,
+    Helvetica,
+    Arial,
     sans-serif;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar but keep scrolling */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE + Edge */
+  scrollbar-width: none; /* Firefox */
 }

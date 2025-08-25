@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+@AllArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
-public class LoginRequestDTO {
-	private String email;
-	private String password;
+
+public class ReportSummaryDTO {
+	private Long total;
+	private Long pending;
+	private Long closed;
 }

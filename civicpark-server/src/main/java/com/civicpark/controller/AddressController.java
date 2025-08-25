@@ -37,6 +37,7 @@ public class AddressController {
 		return ResponseEntity.ok(addresses);
 	}
 
+
 	@PostMapping
 	public ResponseEntity<Address> addUser(@RequestBody AddressRequestDTO address) {
 		Address newAddress = addressService.addUser(address);

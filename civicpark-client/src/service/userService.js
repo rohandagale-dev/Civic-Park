@@ -1,21 +1,34 @@
 import axios from "axios";
-import axiosInstance from "../utils/AxiosConfig";
 
-// Correct way to use VITE environment variable
 const baseURL = import.meta.env.VITE_REST_URL;
-const url2 = import.meta.env.VITE_REST_URL + "/user";
-axios.defaults.withCredentials = true;
-const url3 = import.meta.env.VITE_REST_URL + "/public/user";
 
 //==================== Login User ====================//
 export const loginUser = async (data) => {
   try {
-    const response = await axios.post(url3 + "/login", data, {
+    const response = await axios.post(`${baseURL}/public/user/login`, data, {
       withCredentials: true,
     });
     return response;
   } catch (error) {
     console.error("Login failed:", error);
+  }
+};
+
+//==========================================================//
+/**
+ * Handle user sign up
+ *
+ * @param data
+ */
+export const signUpUser = async (data) => {
+  try {
+    const response = await axios.post(`${baseURL}/public/user/signup`, data, {
+      withCredentials: false,
+    });
+    console.log(response)
+    return response.status;
+  } catch (error) {
+    throw new Error("Error while creating user");
   }
 };
 

@@ -1,12 +1,8 @@
 import { useState } from "react";
-import {
-  emailValidator,
-  passwordValidator,
-} from "../utils/validators/formValidator";
-import { loginUser } from "../service/userService";
+import { useNavigate } from "react-router-dom";
+import { emailValidator, passwordValidator } from "../utils/validators/formValidator";
 import { Input } from "./UI/Input";
 import { Button } from "./UI/Button";
-import { useNavigate } from "react-router-dom";
 import { useAccount } from "../context/ContextProvider";
 
 const LoginForm = () => {
@@ -35,8 +31,7 @@ const LoginForm = () => {
       emailError = "Invalid email address";
     }
     if (passwordValidator(form.password)) {
-      passwordError =
-        "Password must be at least 6 characters and include a number";
+      passwordError = "Password must be at least 6 characters and include a number";
     }
 
     setErrors({ email: emailError, password: passwordError });
@@ -46,10 +41,9 @@ const LoginForm = () => {
         try {
           const res = await loginUser(form);
           setAccount(res.data);
-          localStorage.setItem("userId", res.data.userId);
           navigate("/rto-user");
         } catch (error) {
-          console.log("inside login page failed");
+          navigate("/login");
         }
       };
       submit();
@@ -57,12 +51,7 @@ const LoginForm = () => {
   };
 
   return (
-    <form
-      className="flex flex-col w-80 gap-4   "
-      onSubmit={handleSubmit}
-      noValidate
-    >
-      <p>this is login form</p>
+    <form className="flex flex-col w-80 gap-4   " onSubmit={handleSubmit} noValidate>
       <Input
         label="Email"
         name="email"
@@ -98,7 +87,7 @@ const LoginForm = () => {
       </div>
       <div className="mt-4">
         <Button name="Login" onSubmit={handleSubmit}>
-          Login
+          Submit
         </Button>
       </div>
     </form>

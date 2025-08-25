@@ -2,6 +2,8 @@ package com.civicpark.entities;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "rto_offices")
+@Table(name = "rto_office")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -64,6 +66,7 @@ public class RtoOffice {
 	private String officerInCharge;
 
 	@Column(updatable = false)
+	@CreationTimestamp
 	private LocalDateTime createdAt;
 
 }
